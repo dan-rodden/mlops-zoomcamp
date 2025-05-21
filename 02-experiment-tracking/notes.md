@@ -109,3 +109,38 @@ If we have saved a model using __method 2__ then we get a whole set of files:
 __NOTE: ONE SHOULD ALSO SAVE THE PREPROCESSOR USED TO CREATE THE MODEL. THIS MEANS WE WANT THE DICTVECTORIZER USED TO GENERATE THE MODEL. DONT FORGET TO INCUDE IT AS AN ARTIFACT!__
 Logging the preprocessor should look something like: `mlflow.log_artifact(<local_path_to_store>, <path_to_store_on_MLFlow>)`
 - `mlflow.log_artifact(../../preprocessors/preprocessor.bin, artifact_path='preprocessors')`
+
+# Model Registries
+
+Main parts of the mlflow registry (the model is not being deployed through the registry, it just organizes the stage):
+- staging
+- production
+- archive of old formerly used models
+
+In Version 2 of Mlflow, one uses aliases to state whether models are in staging, production, or arhive. The app does not officially support the three above rather it is up to the team of DS and engineers to give models the proper alias. There is still a promotion feature for models.
+
+One should consider when choosing a modelm the time to train and size especially if it is a user-facing model.
+
+# Use python to orchestrate Mlflow
+
+One can use python to control Mlflow such as adding experiments. Here is starter code:
+```python
+from mlflow.tracking import MlflowClient
+
+MLFLOW_TRACKING_URI='sqlite:///mlflow.db'
+
+client = MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
+
+#create an experiment at MLFLOW_TRACKING_URI address
+client.create_experiment(name='name_of_experiment')
+
+# get runs in an experiment that fall into this category
+runs = client.search_runs(
+    experiment_ids='1',
+    filter_string="",
+    run_view_types=ViewType.ACTIVE_ONLY
+    max_results=5,
+    order_by='rmse'
+)
+```
+
